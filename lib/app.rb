@@ -14,78 +14,81 @@ class StudyBuddy < Shoes
 
   WORDS = []
 
-  # TODO: Have a base stack which is redrawn for each route
+  # store currently used stacks
+  APP = Hashie::Mash.new
 
   def index
     # For some reason, filling the window with this stack causes
     # an overflow and needs a scrollbar. .92 is the perfect fit
-    stack height: 0.92 do
+    APP[:main] = stack height: 0.92 do
       main_background
       title "Let's Study!", align: "center"
-    end
 
-    flow do
-      main_background
-      button 'study' do
-        visit '/study'
-      end
-      button 'add vocab' do
-        visit '/add_words'
+      flow do
+        main_background
+        button 'study' do
+          visit '/study'
+        end
+        button 'add vocab' do
+          visit '/add_words'
+        end
       end
     end
   end
 
   def add_words
-    stack height: 1.0, margin: 10 do
-      main_background curve: 20
-      banner 'New Word', align: 'center', margin_bottom: 5
+    APP.main.clear do
+        stack margin: 10 do
+          main_background curve: 20
+          banner 'New Word', align: 'center', margin_bottom: 5
 
-      # Collection of edit_lines for enumerability
-      edit_lines = {inf: nil,
-                    def: nil,
-                    je: nil,
-                    tu: nil,
-                    il: nil,
-                    nous: nil,
-                    vous: nil,
-                    ils: nil}
+          # Collection of edit_lines for enumerability
+          edit_lines = {inf: nil,
+                        def: nil,
+                        je: nil,
+                        tu: nil,
+                        il: nil,
+                        nous: nil,
+                        vous: nil,
+                        ils: nil}
 
-      flow do
-        para "Infinitve: "
-        edit_lines[:inf] = edit_line
-        para "Definition: "
-        edit_lines[:def] = edit_line
-      end
+          flow do
+            para "Infinitve: "
+            edit_lines[:inf] = edit_line
+            para "Definition: "
+            edit_lines[:def] = edit_line
+          end
 
-      # Setup inputs and labels for conjugations
-      edit_lines.each_key do |key|
-        next if key.eql?(:inf) || key.eql?(:def)
-        flow do
-          para "#{key.to_s}: "
-          edit_lines[key] = edit_line
-        end
-      end
-
-      flow do
-        button "Save" do
-          @word = Word.new do |word|
-            edit_lines.each do |k,v|
-              word[k] = v.text
+          # Setup inputs and labels for conjugations
+          edit_lines.each_key do |key|
+            next if key.eql?(:inf) || key.eql?(:def)
+            flow do
+              para "#{key.to_s}: "
+              edit_lines[key] = edit_line
             end
           end
 
-          WORDS << @word
-          clear_edit_lines edit_lines.values
-        end
+          flow do
+            button "Save" do
+              @word = Word.new do |word|
+                edit_lines.each do |k,v|
+                  word[k] = v.text
+                end
+              end
 
-        button 'New Word' do
-          clear_edit_lines edit_lines.values
-        end
+              WORDS << @word
+              clear_edit_lines edit_lines.values
+            end
 
-        button "Go Back" do
-          visit '/'
+            button 'New Word' do
+              clear_edit_lines edit_lines.values
+            end
+
+            button "Go Back" do
+              visit '/'
+            end
+          end
         end
-      end
     end
   end
 
