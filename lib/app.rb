@@ -1,6 +1,8 @@
 require 'hashie'
 require 'json'
 
+# Extending Hashie::Mash allows for method like calling of
+# keys in a hash. Having a block makes creation easier
 class Word < ::Hashie::Mash
   def initialize(&block)
     yield self
@@ -14,23 +16,13 @@ class StudyBuddy < Shoes
 
   WORDS = []
 
-  # store containers
+  # Collection of elements. Primarily elements that don't get
+  # removed when they are supposed to
   APP = Hashie::Mash.new
 
   def index
-    # TODO: Extract these two if statements into private methods
-    if APP.edit_lines?
-      puts "clearing edit_lines"
-      APP.edit_lines.map &:remove
-      APP.edit_lines = nil
-    end
-
-    if APP.buttons?
-      APP.buttons.each do |key, val|
-        puts "Removing #{key} button"
-        val.remove
-      end
-    end
+    remove_edit_lines
+    remove_buttons
 
     # For some reason, filling the window with this stack causes
     # an overflow and needs a scrollbar. .92 is the perfect fit
@@ -92,6 +84,8 @@ class StudyBuddy < Shoes
         APP.edit_lines = edit_lines.values
 
         flow margin_left: 200 do
+
+          # store these buttons in a buttons mash inside of APP global
           APP.buttons!.save = button "Save" do
             # TODO: verify edit_lines aren't empty
             @word = Word.new do |word|
@@ -147,11 +141,45 @@ class StudyBuddy < Shoes
       background("#089C68", options)
     end
 
-    def clear_edit_lines(lines)
-      lines.each do |line|
-        line.text = ''
+    # Reset the values of the given inputs
+    def clear_edit_lines(inputs)
+      inputs.each do |input|
+        input.text = ''
+      end
+    end
+
+    # clear all the buttons on the page
+    # pass in a :but key with the label of the button to keep
+    #
+    # remove_buttons but: :back
+    def remove_buttons(options = {})
+      if buttons = APP.buttons
+        if options.has_key? :but
+          but = options[:but].to_s
+          buttons.each do |key, el|
+            puts "key is a: #{key.class}"
+            unless key.eql? but
+              puts "removing #{key} button"
+              el.remove
+            else
+              puts "not removing #{key} button"
+            end
+          end
+        else
+          buttons.each_value.map &:remove
+        end
+      end
+    end
+
+    # this is really only used after leaving a page with a form because
+    # the edit_line elements don't get removed on the clear() call
+    def remove_edit_lines
+      if APP.edit_lines?
+        puts "clearing edit_lines"
+        APP.edit_lines.map &:remove
+        APP.edit_lines = nil
       end
     end
 end
 
-Shoes.app title: 'Study Buddy', height: 500
+Shoes.app title: 'Study Buddy', height: 400
