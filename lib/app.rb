@@ -15,6 +15,12 @@ class StudyBuddy < Shoes
   url '/add_words' , :add_words
 
   WORDS = []
+  WORDS << Word.new do |word|
+    word.inf = 'manger'
+    word.def = 'to eat'
+    word.je = 'mange'
+    word.tu = 'manges'
+  end
 
   # Collection of elements. Primarily elements that don't get
   # removed when they are supposed to
@@ -33,9 +39,7 @@ class StudyBuddy < Shoes
       flow do
         main_background
 
-        # This button doesn't get removed when APP.main gets cleared
-        # so it needs to be manually removed. Storing it for reference
-        APP.study_button = button 'study' do
+        APP.buttons!.study = button 'study' do
           visit '/study'
         end
         button 'add vocab' do
@@ -46,7 +50,8 @@ class StudyBuddy < Shoes
   end
 
   def add_words
-    APP.study_button.remove
+    remove_buttons
+    remove_edit_lines
 
     APP.main.clear do
       stack do
@@ -113,13 +118,42 @@ class StudyBuddy < Shoes
   end
 
   def study
+    remove_edit_lines
+    remove_buttons
+
     main_background
 
-    index = 0
-    word = WORDS[index]
+    @words_index = 0
+    @word = WORDS[@words_index]
 
-    stack height: 0.8, width: 1.0 do
-      @title = banner "#{word.inf}", align: "center"
+    # order of conjugations, excluding the infinitive and including the definition
+    @conjugations = [:def, :je, :tu, :il, :nous, :vous, :ils]
+
+    # index of the conjugations
+    @conjugations_index = 0
+
+    stack width: 1.0 do
+      @title = banner "#{@word.inf}", align: "center"
+    end
+
+    # actual form section
+    #
+    # label
+    # edit_line
+    flow margin_left: 200 do
+      label = @conjugations[@conjugations_index]
+      if label == :def
+        @label = para 'Definition'
+      else
+        @label = para @conjugations[@conjugations_index]
+      end
+
+      @input = edit_line
+      if lines = APP.edit_lines?
+        lines << @input
+      else
+        APP.edit_lines = [@input]
+      end
     end
 
     flow margin: 10 do
@@ -127,10 +161,10 @@ class StudyBuddy < Shoes
         visit '/'
       end
 
-      button 'Next' do
-        index += 1
-        word = WORDS[index]
-        @title.replace word.inf
+      APP.buttons!.next = button 'Next' do
+        # TODO: Validate input for presence and correctness
+        @conjugations_index += 1
+        next_conjugation @conjugations[@conjugations_index], @label, @input
       end
     end
   end
@@ -161,8 +195,6 @@ class StudyBuddy < Shoes
             unless key.eql? but
               puts "removing #{key} button"
               el.remove
-            else
-              puts "not removing #{key} button"
             end
           end
         else
@@ -177,9 +209,14 @@ class StudyBuddy < Shoes
       if APP.edit_lines?
         puts "clearing edit_lines"
         APP.edit_lines.map &:remove
-        APP.edit_lines = nil
       end
+    end
+
+    # replace the label and edit_line during studying when 'next' is clicked
+    def next_conjugation(text, label, edit_line)
+      label.text = text
+      edit_line.text = ''
     end
 end
 
-Shoes.app title: 'Study Buddy', height: 400
+Shoes.app title: 'Study Buddy', height: 450
