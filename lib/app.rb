@@ -2,7 +2,6 @@
 require '~/projects/tutor/lib/tutor/word'
 require '~/projects/tutor/lib/tutor/cleans'
 require 'hashie'
-require 'json'
 
 module Tutor
   # Collection of elements. Primarily elements that don't get

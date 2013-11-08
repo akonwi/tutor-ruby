@@ -13,9 +13,11 @@ module Tutor
     # this is really only used after leaving a page with a form because
     # the edit_line elements don't get removed on the clear() call
     def remove_edit_lines
-      if APP.edit_lines?
-        puts "Removing edit_lines"
-        APP.edit_lines.map &:remove
+      if lines = APP.edit_lines?
+        unless lines.empty?
+          puts "Removing edit_lines"
+          lines.map &:remove
+        end
       end
     end
 
