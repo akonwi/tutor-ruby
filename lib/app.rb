@@ -89,17 +89,20 @@ module Tutor
 
             # store these buttons in a buttons mash inside of APP global
             APP.buttons!.save = button "Save" do
-              # TODO: verify edit_lines aren't empty
-              @word = Word.new do |word|
-                edit_lines.each do |k,v|
-                  word[k] = v.text
+              if validate_inputs edit_lines
+                @word = Word.new do |word|
+                  edit_lines.each do |k,v|
+                    word[k] = v.text
+                  end
                 end
+
+                puts "Created #{@word.inf}"
+
+                WORDS << @word
+                clear_edit_lines edit_lines.values
+              else
+                puts 'not valid'
               end
-
-              puts "Created #{@word.inf}"
-
-              WORDS << @word
-              clear_edit_lines edit_lines.values
             end
 
             APP.buttons.new = button 'New Word' do
@@ -176,6 +179,19 @@ module Tutor
       def next_conjugation(text, label, edit_line)
         label.text = text
         edit_line.text = ''
+      end
+
+      # make sure inputs from a form aren't empty
+      def validate_inputs(edit_lines)
+        valid = true
+        edit_lines.each do |key, val|
+          if val.text.empty?
+            puts "#{key} is not valid"
+            valid = false
+            break
+          end
+        end
+        valid
       end
   end
 end
