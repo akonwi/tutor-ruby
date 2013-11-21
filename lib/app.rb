@@ -162,9 +162,12 @@ module Tutor
         end
 
         APP.buttons!.next = button 'Next' do
-          # TODO: Validate input for presence and correctness
-          @conjugations_index += 1
-          next_conjugation @conjugations[@conjugations_index], @label, @input
+          if @input.text == @word[@conjugations[@conjugations_index]]
+            @conjugations_index += 1
+            next_conjugation @conjugations[@conjugations_index], @label, @input
+          else
+            alert "Sorry, that's wrong."
+          end
         end
       end
     end
