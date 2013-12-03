@@ -1,0 +1,37 @@
+---
+- !ruby/hash:Tutor::Word
+  inf: manger
+  def: to eat
+  je: mange
+  tu: manges
+  il: mange
+  nous: mangeons
+  vouz: mangez
+  ils: mangent
+- !ruby/hash:Tutor::Word
+  inf: boire
+  def: to drink
+  je: bois
+  tu: bois
+  il: boit
+  nous: boissons
+  vouz: boissez
+  ils: boissent
+- !ruby/hash:Tutor::Word
+  inf: etre
+  def: to be
+  je: suis
+  tu: es
+  il: est
+  nous: sommes
+  vous: etes
+  ils: sont
+- !ruby/hash:Tutor::Word
+  inf: parler
+  def: to speak
+  je: parle
+  tu: parles
+  il: parle
+  nous: parleons
+  vous: parlez
+  ils: parlent

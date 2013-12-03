@@ -16,19 +16,9 @@ module Tutor
     url '/study', :study
     url '/add_words' , :add_words
 
-    words_file = File.join(File.dirname(__FILE__), '/stuff/words.yaml')
+    Words_File = File.join(File.dirname(__FILE__), '/stuff/words.yaml')
 
-    #WORDS = YAML.load_file File.join(File.dirname(__FILE__), '/stuff/words.yaml')
-    w =  Word.new do |word|
-      word.inf = 'manger'
-      word.def = 'to eat'
-      word.je = 'mange'
-      word.tu = 'manges'
-    end
-
-    File.open words_file do |file|
-      file.write w.to_yaml
-    end
+    WORDS = YAML.load_file Words_File
 
     def index
       remove_edit_lines
@@ -106,6 +96,11 @@ module Tutor
                 puts "Created #{@word.inf}"
 
                 WORDS << @word
+                file = File.open Words_File, 'w'
+                file.truncate 0
+                file.write WORDS.to_yaml
+                file.close
+
                 clear_edit_lines edit_lines.values
               else
                 puts 'not valid'
