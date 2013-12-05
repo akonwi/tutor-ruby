@@ -1,6 +1,8 @@
+Current_Dir = File.dirname(__FILE__)
+
 # need full path because of the way startup of shoes works right now
-require '~/projects/tutor/lib/tutor/word'
-require '~/projects/tutor/lib/tutor/cleans'
+require File.join(Current_Dir, '/lib/tutor/word')
+require File.join(Current_Dir, '/lib/tutor/cleans')
 require 'hashie'
 require 'yaml'
 
@@ -16,7 +18,7 @@ module Tutor
     url '/study', :study
     url '/add_words' , :add_words
 
-    Words_File = File.join(File.dirname(__FILE__), '/stuff/words.yaml')
+    Words_File = File.join(Current_Dir, '/stuff/words.yaml')
 
     WORDS = YAML.load_file Words_File
 
@@ -126,7 +128,8 @@ module Tutor
       main_background
 
       @words_index = 0
-      @word = WORDS[@words_index]
+      @words = WORDS.shuffle
+      @word = @words[@words_index]
 
       # order of conjugations, excluding the infinitive and including the definition
       @conjugations = [:def, :je, :tu, :il, :nous, :vous, :ils]
@@ -173,7 +176,7 @@ module Tutor
               next_conjugation next_conj, @label, @input
             else
               @words_index += 1
-              @word = WORDS[@words_index]
+              @word = @words[@words_index]
 
               @conjugations_index = 0
               next_conjugation @conjugations.first, @label, @input
