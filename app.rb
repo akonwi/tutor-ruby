@@ -230,6 +230,8 @@ module Tutor
             @words_index += 1
             @word = @words[@words_index]
 
+            @title.text = @word.inf
+
             @conjugations_index = 0
             next_conjugation @conjugations.first, @label, @input
           end
