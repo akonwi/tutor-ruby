@@ -129,7 +129,7 @@ module Tutor
       # index of the conjugations
       @conjugations_index = 0
 
-      stack width: 1.0 do
+      APP.header = stack width: 1.0 do
         @title = banner "#{@word.inf}", align: "center"
       end
 
@@ -230,7 +230,9 @@ module Tutor
             @words_index += 1
             @word = @words[@words_index]
 
-            @title.text = @word.inf
+            APP.header.clear do
+              @title = banner @word.inf, align: 'center'
+            end
 
             @conjugations_index = 0
             next_conjugation @conjugations.first, @label, @input
