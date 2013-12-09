@@ -20,7 +20,11 @@ module Tutor
 
     Words_File = File.join(Current_Dir, '/stuff/words.yaml')
 
-    WORDS = YAML.load_file Words_File
+    unless File.exists? Words_File
+      File.new(Words_File, 'w').close
+    end
+
+    WORDS = YAML.load_file(Words_File) || []
 
     def index
       remove_edit_lines
@@ -81,31 +85,19 @@ module Tutor
             end
           end
 
-          # storing the edit_lines from the form for removal later
           APP.edit_lines = edit_lines.values
 
           flow margin_left: 200 do
 
             # store these buttons in a buttons mash inside of APP global
             APP.buttons!.save = button "Save" do
-              if validate_inputs edit_lines
-                @word = Word.new do |word|
-                  edit_lines.each do |k,v|
-                    word[k] = v.text
-                  end
-                end
+              before_save edit_lines
+            end
 
-                puts "Created #{@word.inf}"
-
-                WORDS << @word
-                file = File.open Words_File, 'w'
-                file.truncate 0
-                file.write WORDS.to_yaml
-                file.close
-
-                clear_edit_lines edit_lines.values
-              else
-                puts 'not valid'
+            # When 'enter' key is pressed, save
+            keypress do |key|
+              if key.eql? "\n"
+                before_save edit_lines
               end
             end
 
@@ -167,23 +159,12 @@ module Tutor
         end
 
         APP.buttons!.next = button 'Next' do
-          if @input.text == @word[@conjugations[@conjugations_index]]
-            @conjugations_index += 1
+          go_next
+        end
 
-            # if there is another conjugation to do, do it
-            # otherwise go to the next word in the list
-            if next_conj = @conjugations[@conjugations_index]
-              next_conjugation next_conj, @label, @input
-            else
-              @words_index += 1
-              @word = @words[@words_index]
-
-              @conjugations_index = 0
-              next_conjugation @conjugations.first, @label, @input
-            end
-          else
-            alert "Sorry, that's wrong."
-          end
+        # when 'enter' key is pressed
+        keypress do |key|
+          go_next if key.eql? "\n"
         end
       end
     end
@@ -200,6 +181,29 @@ module Tutor
         edit_line.text = ''
       end
 
+      # callback for when clicking save for a new word
+      def before_save(edit_lines)
+        if validate_inputs edit_lines
+          @word = Word.new do |word|
+            edit_lines.each do |k,v|
+              word[k] = v.text
+            end
+          end
+
+          puts "Created #{@word.inf}"
+
+          WORDS << @word
+          file = File.open Words_File, 'w'
+          file.truncate 0
+          file.write WORDS.to_yaml
+          file.close
+
+          clear_edit_lines edit_lines.values
+        else
+          puts 'not valid'
+        end
+      end
+
       # make sure inputs from a form aren't empty
       def validate_inputs(edit_lines)
         valid = true
@@ -211,6 +215,27 @@ module Tutor
           end
         end
         valid
+      end
+
+      # callback for next button when studying
+      def go_next
+        if @input.text == @word[@conjugations[@conjugations_index]]
+          @conjugations_index += 1
+
+          # if there is another conjugation to do, do it
+          # otherwise go to the next word in the list
+          if next_conj = @conjugations[@conjugations_index]
+            next_conjugation next_conj, @label, @input
+          else
+            @words_index += 1
+            @word = @words[@words_index]
+
+            @conjugations_index = 0
+            next_conjugation @conjugations.first, @label, @input
+          end
+        else
+          alert "Sorry, that's wrong."
+        end
       end
   end
 end
