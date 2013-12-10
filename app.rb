@@ -228,10 +228,12 @@ module Tutor
             next_conjugation next_conj, @label, @input
           else
             @words_index += 1
-            @word = @words[@words_index]
-
-            APP.header.clear do
-              @title = banner @word.inf, align: 'center'
+            if @word = @words[@words_index]
+              APP.header.clear do
+                @title = banner @word.inf, align: 'center'
+              end
+            else
+              alert 'Those are all the words'
             end
 
             @conjugations_index = 0
