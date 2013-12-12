@@ -15,8 +15,8 @@ module Tutor
     include Cleans
 
     url '/', :index
-    url '/study', :study
-    url '/add_words' , :add_words
+    url '/study', :study_page
+    url '/add_words' , :add_words_page
 
     Words_File = File.join(Current_Dir, '/stuff/words.yaml')
 
@@ -49,7 +49,7 @@ module Tutor
       end
     end
 
-    def add_words
+    def add_words_page
       remove_buttons
       remove_edit_lines
 
@@ -113,7 +113,7 @@ module Tutor
       end
     end
 
-    def study
+    def study_page
       remove_edit_lines
       remove_buttons
 
