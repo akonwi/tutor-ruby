@@ -1,8 +1,11 @@
 Current_Dir = File.dirname(__FILE__)
 
 # need full path because of the way startup of shoes works right now
-require File.join(Current_Dir, '/lib/tutor/word')
 require File.join(Current_Dir, '/lib/tutor/cleans')
+require File.join(Current_Dir, '/lib/tutor/common')
+require File.join(Current_Dir, '/lib/tutor/word')
+require File.join(Current_Dir, '/lib/tutor/study')
+require File.join(Current_Dir, '/lib/tutor/add_words')
 require 'hashie'
 require 'yaml'
 
@@ -10,104 +13,37 @@ module Tutor
   # Collection of elements. Primarily elements that don't get
   # removed when they are supposed to
   APP = Hashie::Mash.new
+  Words_File = File.join(Current_Dir, '/stuff/words.yaml')
+
+  unless File.exists? Words_File
+    File.new(Words_File, 'w').close
+  end
+
+  Words = YAML.load_file(Words_File) || []
+  Common::Words = Words
 
   class StudyBuddy < Shoes
+    include Common
     include Cleans
 
     url '/', :index
-    url '/study', :study_page
-    url '/add_words' , :add_words_page
-
-    Words_File = File.join(Current_Dir, '/stuff/words.yaml')
-
-    unless File.exists? Words_File
-      File.new(Words_File, 'w').close
-    end
-
-    WORDS = YAML.load_file(Words_File) || []
 
     def index
       remove_edit_lines
       remove_buttons
 
-      # For some reason, filling the window with this stack causes
-      # an overflow and needs a scrollbar. .92 is the perfect fit
-      APP[:main] = stack height: 0.92 do
+      APP[:main] = stack Options do
         main_background
         title "Let's Study!", align: "center"
 
         flow do
           main_background
 
-          APP.buttons!.study = button 'study' do
+          APP.buttons!.study = button 'Study' do
             visit '/study'
           end
-          button 'add vocab' do
-            visit '/add_words'
-          end
-        end
-      end
-    end
-
-    def add_words_page
-      remove_buttons
-      remove_edit_lines
-
-      APP.main.clear do
-        stack do
-          main_background
-          banner 'New Word', align: 'center', margin_bottom: 5
-
-          # Collection of edit_lines for enumerability
-          edit_lines = {inf: nil,
-                        def: nil,
-                        je: nil,
-                        tu: nil,
-                        il: nil,
-                        nous: nil,
-                        vous: nil,
-                        ils: nil}
-
-          # trying to center the form with the margin_left
-          flow margin_left: 200 do
-            para "Infinitve: "
-            edit_lines[:inf] = edit_line
-            para "Definition: "
-            edit_lines[:def] = edit_line
-          end
-
-          # Setup inputs and labels for conjugations
-          edit_lines.each_key do |key|
-            next if key.eql?(:inf) || key.eql?(:def)
-            flow margin_left: 200 do
-              para "#{key.to_s}: "
-              edit_lines[key] = edit_line
-            end
-          end
-
-          APP.edit_lines = edit_lines.values
-
-          flow margin_left: 200 do
-
-            # store these buttons in a buttons mash inside of APP global
-            APP.buttons!.save = button "Save" do
-              before_save edit_lines
-            end
-
-            # When 'enter' key is pressed, save
-            keypress do |key|
-              if key.eql? "\n"
-                before_save edit_lines
-              end
-            end
-
-            APP.buttons.new = button 'New Word' do
-              clear_edit_lines edit_lines.values
-            end
-
-            APP.buttons.back = button "Go Back" do
-              visit '/'
-            end
+          button 'Add Vocab' do
+            visit '/add'
           end
         end
       end
@@ -120,7 +56,7 @@ module Tutor
       main_background
 
       @words_index = 0
-      @words = WORDS.shuffle
+      @words = Words.shuffle
       @word = @words[@words_index]
 
       # order of conjugations, excluding the infinitive and including the definition
@@ -171,50 +107,10 @@ module Tutor
 
     private
 
-      def main_background(options={})
-        background("#089C68", options)
-      end
-
       # replace the label and edit_line during studying when 'next' is clicked
       def next_conjugation(text, label, edit_line)
         label.text = text
         edit_line.text = ''
-      end
-
-      # callback for when clicking save for a new word
-      def before_save(edit_lines)
-        if validate_inputs edit_lines
-          @word = Word.new do |word|
-            edit_lines.each do |k,v|
-              word[k] = v.text
-            end
-          end
-
-          puts "Created #{@word.inf}"
-
-          WORDS << @word
-          file = File.open Words_File, 'w'
-          file.truncate 0
-          file.write WORDS.to_yaml
-          file.close
-
-          clear_edit_lines edit_lines.values
-        else
-          puts 'not valid'
-        end
-      end
-
-      # make sure inputs from a form aren't empty
-      def validate_inputs(edit_lines)
-        valid = true
-        edit_lines.each do |key, val|
-          if val.text.empty?
-            puts "#{key} is not valid"
-            valid = false
-            break
-          end
-        end
-        valid
       end
 
       # callback for next button when studying
@@ -246,4 +142,6 @@ module Tutor
   end
 end
 
-Shoes.app title: 'Study Buddy', height: 450
+options = {title: 'Study Buddy'}
+options.merge! Tutor::Common::Options
+Shoes.app options
