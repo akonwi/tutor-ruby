@@ -7,8 +7,7 @@ module Tutor
     url '/add/(\w+)', :add_word
 
     def add_menu
-      remove_buttons
-      remove_edit_lines
+      clean
 
       APP.main.clear do
         stack Options do
@@ -20,19 +19,23 @@ module Tutor
           stack margin_left: 200 do
             box = list_box items: ['Verb', 'Adjective', 'Noun', 'Stuff']
             box.choose 'Verb'
+            APP.list_box = box
           end
 
           flow margin_left: 200 do
-            button('Next').click { visit "/add/#{box.text}" }
-            button('Back').click { visit '/' }
+            APP.buttons!.next = button 'Next' do
+              visit "/add/#{box.text}"
+            end
+            APP.buttons.back = button 'Back' do
+              visit '/'
+            end
           end
         end
       end
     end
 
     def add_word(type)
-      remove_edit_lines
-      remove_buttons
+      clean
 
       APP.main.clear do
         stack Options do
@@ -68,7 +71,7 @@ module Tutor
               end
 
               APP.buttons.back = button 'Back' do
-                visit '/add/'
+                visit '/add'
               end
             end
 

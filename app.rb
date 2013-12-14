@@ -29,8 +29,7 @@ module Tutor
     url '/', :index
 
     def index
-      remove_edit_lines
-      remove_buttons
+      clean
 
       APP[:main] = stack Options do
         main_background
