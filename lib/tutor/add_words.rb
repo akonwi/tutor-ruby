@@ -95,7 +95,7 @@ module Tutor
       def handle_save(edit_lines, type)
         if validate_inputs edit_lines
           @word = Word.new do |word|
-            word.type = type.to_sym
+            word.type = type.downcase.to_sym
             edit_lines.each do |k,v|
               word[k] = v.text
             end
