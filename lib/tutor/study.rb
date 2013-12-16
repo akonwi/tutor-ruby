@@ -10,7 +10,7 @@ module Tutor
     def study_menu
       clean
 
-      APP.main.clear do
+      App.main.clear do
         stack Options do
           main_background
 
@@ -24,7 +24,7 @@ module Tutor
           end
 
           flow margin_left: 200 do
-            APP.buttons!.next = button 'Next' do
+            App.buttons!.next = button 'Next' do
               visit "/study/#{box.text}"
             end
           end
@@ -55,7 +55,7 @@ module Tutor
       @word = @@words[index]
       @@words_index = index
 
-      APP.main.clear do |key|
+      App.main.clear do |key|
         stack Options do
           main_background
           if @word
@@ -67,7 +67,7 @@ module Tutor
             end
           else
             banner "There's nothing to study", align: 'center'
-            APP.buttons!.back = button 'Back' do
+            App.buttons!.back = button 'Back' do
               visit '/'
             end
           end
@@ -90,19 +90,19 @@ module Tutor
           end
 
           @input = edit_line
-          if lines = APP.edit_lines
+          if lines = App.edit_lines
             lines << @input
           else
-            APP.edit_lines = [@input]
+            App.edit_lines = [@input]
           end
         end
 
         flow margin: 30 do
-          APP.buttons!.back = button 'Back' do
+          App.buttons!.back = button 'Back' do
             visit '/'
           end
 
-          APP.buttons.next = button 'Next' do
+          App.buttons.next = button 'Next' do
             go_next index
           end
 

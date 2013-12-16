@@ -9,7 +9,7 @@ module Tutor
     def add_menu
       clean
 
-      APP.main.clear do
+      App.main.clear do
         stack Options do
           main_background
           banner 'New Word', align: 'center', margin_bottom: 5
@@ -19,14 +19,14 @@ module Tutor
           stack margin_left: 200 do
             box = list_box items: ['Verb', 'Adjective', 'Noun', 'Stuff']
             box.choose 'Verb'
-            APP.list_box = box
+            App.list_box = box
           end
 
           flow margin_left: 200 do
-            APP.buttons!.next = button 'Next' do
+            App.buttons!.next = button 'Next' do
               visit "/add/#{box.text}"
             end
-            APP.buttons.back = button 'Back' do
+            App.buttons.back = button 'Back' do
               visit '/'
             end
           end
@@ -37,7 +37,7 @@ module Tutor
     def add_word(type)
       clean
 
-      APP.main.clear do
+      App.main.clear do
         stack Options do
           main_background
           banner type, align: 'center'
@@ -62,15 +62,15 @@ module Tutor
                 end
               end
 
-              APP.edit_lines = edit_lines.values
+              App.edit_lines = edit_lines.values
             end
 
             flow margin_left: 200 do
-              APP.buttons!.save = button 'Save' do
+              App.buttons!.save = button 'Save' do
                 handle_save edit_lines, type
               end
 
-              APP.buttons.back = button 'Back' do
+              App.buttons.back = button 'Back' do
                 visit '/add'
               end
             end

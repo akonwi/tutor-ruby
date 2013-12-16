@@ -13,7 +13,7 @@ module Tutor
     # For general cleanup, this method does it all so
     # each page doesn't need to list each method call
     def clean
-      APP.each do |key, obj|
+      App.each do |key, obj|
         # Only Hashie::Mash responds to fetch. Don't call remove on that
         # or on the Shoes slots
         unless obj.respond_to? :fetch
@@ -29,7 +29,7 @@ module Tutor
     # this is really only used after leaving a page with a form because
     # the edit_line elements don't get removed on the clear() call
     def remove_edit_lines
-      if lines = APP.edit_lines
+      if lines = App.edit_lines
         unless lines.empty?
           puts "Removing edit_lines"
           lines.map &:remove
@@ -43,7 +43,7 @@ module Tutor
     # remove_buttons but: :back
     def remove_buttons(options = {})
       puts "Removing buttons"
-      if buttons = APP.buttons
+      if buttons = App.buttons
         if options.has_key? :but
           but = options[:but].to_s
           buttons.each do |key, el|
