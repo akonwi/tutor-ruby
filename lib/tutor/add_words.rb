@@ -37,50 +37,53 @@ module Tutor
     def add_word(type)
       clean
 
+      @type = type
       App.main.clear do
         stack Options do
           main_background
           banner type, align: 'center'
 
-          edit_lines = {}
+          @edit_lines = {}
+          stuff_to_ask = [ :inf, :def, :je, :tu, :il, :nous, :vous, :ils ]
 
           case type
           when 'Verb'
-            verb_conjugations = [ :inf, :def, :je, :tu, :il, :nous, :vous, :ils ]
 
             flow margin_left: 200 do
-              verb_conjugations.each do |conj|
+              stuff_to_ask.each do |conj|
                 if conj.eql? :inf
                   para "Infinitive"
-                  edit_lines[:inf] = edit_line
+                  @edit_lines[:inf] = edit_line
                 elsif conj.eql? :def
                   para "Definition"
-                  edit_lines[:def] = edit_line
+                  @edit_lines[:def] = edit_line
                 else
                   para "#{conj.to_s}: "
-                  edit_lines[conj] = edit_line
+                  @edit_lines[conj] = edit_line
                 end
               end
 
               App.edit_lines = edit_lines.values
             end
 
+            footer
+
+          when 'Adjective'
             flow margin_left: 200 do
-              App.buttons!.save = button 'Save' do
-                handle_save edit_lines, type
+              stuff_to_ask[0..1].each do |to_ask|
+                if to_ask.eql? :inf
+                  para 'Word'
+                  @edit_lines[:inf] = edit_line
+                else
+                  para 'Definition'
+                  @edit_lines[:def] = edit_line
+                end
               end
 
-              App.buttons.back = button 'Back' do
-                visit '/add'
-              end
+              App.edit_lines = @edit_lines.values
             end
 
-            # When 'enter' key is pressed, save
-            keypress do |key|
-              if key.eql? "\n"
-                handle_save edit_lines, type
-              end
-            end
+            footer
           ## TODO: when 'Adjective', etc.
           end
         end
@@ -127,6 +130,27 @@ module Tutor
           end
         end
         valid
+      end
+
+      def footer
+        flow margin_left: 200 do
+          App.buttons!.save = button 'Save' do
+            handle_save @edit_lines, @type
+          end
+
+          App.buttons.back = button 'Back' do
+            visit '/add'
+          end
+        end
+      end
+
+      def handle_keypress
+        # When 'enter' key is pressed, save
+        keypress do |key|
+          if key.eql? "\n"
+            handle_save @edit_lines, @type
+          end
+        end
       end
   end
 end
