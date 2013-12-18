@@ -46,9 +46,7 @@ module Tutor
           @edit_lines = {}
           stuff_to_ask = [ :inf, :def, :je, :tu, :il, :nous, :vous, :ils ]
 
-          case type
-          when 'Verb'
-
+          if type == 'Verb'
             flow margin_left: 200 do
               stuff_to_ask.each do |conj|
                 if conj.eql? :inf
@@ -65,10 +63,7 @@ module Tutor
 
               App.edit_lines = edit_lines.values
             end
-
-            footer
-
-          when 'Adjective'
+          else
             flow margin_left: 200 do
               stuff_to_ask[0..1].each do |to_ask|
                 if to_ask.eql? :inf
@@ -82,10 +77,9 @@ module Tutor
 
               App.edit_lines = @edit_lines.values
             end
-
-            footer
-          ## TODO: when 'Adjective', etc.
           end
+          footer
+          handle_keypress
         end
       end
     end
