@@ -59,13 +59,14 @@ module Tutor
         stack Options do
           main_background
           if @word
-            banner = banner @word.inf, align: 'center'
+            banner @word.inf, align: 'center'
             if @word.type.eql? :verb
               quiz_on_verb(0)
             else
-              # TODO: define the 'quiz' method for regular words
+              quiz
             end
           else
+            puts 'no word'
             banner "There's nothing to study", align: 'center'
             App.buttons!.back = button 'Back' do
               visit '/'
@@ -113,16 +114,48 @@ module Tutor
         end
       end
 
+      def quiz
+        flow margin_left: 200 do
+          @label = para 'Definition'
+          @input = edit_line
+          if lines = App.edit_lines
+            lines << @input
+          else
+            App.edit_lines = [@input]
+          end
+        end
+
+        flow margin_left: 30 do
+          App.buttons!.back = button 'Back' do
+            visit '/'
+          end
+
+          App.buttons.next = button 'Next' do
+            go_next
+          end
+
+          keypress do |key|
+            go_next if key.eql? "\n"
+          end
+        end
+      end
+
       # @param index current index of conjugation form in stuff_to_ask
       #
       # this is just a block for when the next button is clicked or
       # enter key is pressed to do what I can to keep code DRY
-      def go_next(index)
-        if validate(index)
-          index += 1
-          next_conjugation(index)
-        else
-          puts 'Sorry, that is incorrect'
+      def go_next(index=nil)
+        if index
+          if validate(index)
+            # TODO: make this an instance variable
+            index += 1
+            next_conjugation(index)
+          else
+            puts 'Sorry, that is incorrect'
+          end
+        elsif validate(index)
+          puts 'it is correct'
+          study_word(@@words_index + 1)
         end
       end
 
@@ -144,8 +177,12 @@ module Tutor
       #               indicates which verb form is being asked
       # @returns boolean is the entered text correct
       def validate(index)
-        puts "answer is: " + @word[@stuff_to_ask[index]]
-        @input.text.eql? @word[@stuff_to_ask[index]]
+        if index
+          puts "answer is: " + @word[@stuff_to_ask[index]]
+          @input.text.eql? @word[@stuff_to_ask[index]]
+        else
+          @input.text.eql? @word.def
+        end
       end
   end
 end
