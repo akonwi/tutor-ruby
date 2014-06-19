@@ -1,0 +1,3 @@
+[submodule "fizzbuzz"]
+	path = fizzbuzz
+	url = ../fizzbuzz
