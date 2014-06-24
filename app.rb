@@ -9,6 +9,7 @@ require File.join(Current_Dir, '/lib/tutor/add_words')
 require 'hashie'
 require 'yaml'
 
+# comment
 module Tutor
   # Collection of elements. Primarily elements that don't get
   # removed when they are supposed to
